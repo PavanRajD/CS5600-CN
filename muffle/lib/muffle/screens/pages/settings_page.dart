@@ -44,7 +44,9 @@ class _SettingsPageState extends State<SettingsPage> {
       isDNDActivated: settingProvider.getPref(FirestoreConstants.isDNDActivated) ?? "",
     );
 
-    ovverideSelectedContacts = settingProvider.getPref(FirestoreConstants.overrideContacts)?.split(",") ?? [];
+    var overrideContacts = settingProvider.getPref(FirestoreConstants.overrideContacts)?.split(",");
+
+    ovverideSelectedContacts = overrideContacts?.where((element) => element.isNotEmpty).toList() ?? [];
 
     isDNDActivated = loggedInUser.isDNDActivated == "true";
 
@@ -59,11 +61,11 @@ class _SettingsPageState extends State<SettingsPage> {
         elevation: 0.4,
         leading: IconButton(
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.of(context).pop(isDNDActivated);
           },
           icon: Icon(
             Icons.arrow_back,
-            color: Colors.green,
+            color: Colors.black,
           ),
         ),
       ),
@@ -154,6 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       activeColor: Colors.red,
                       trackColor: Colors.black,
                       onChanged: (bool val) {
+                        authProvider.updateDNDStatus(val);
                         settingProvider.setPref(FirestoreConstants.isDNDActivated, val.toString());
                         setState(() {
                           isDNDActivated = !isDNDActivated;
@@ -198,8 +201,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 var ovverideContacts = await Navigator.push<List<String>>(context, MaterialPageRoute(builder: (context) => SelectContact(allContacts: widget.allUsers, preSelectedContacts: ovverideSelectedContacts)));
                 if (ovverideContacts != null) {
                   ovverideSelectedContacts = ovverideContacts;
+                  authProvider.updateOvverideListMessage(ovverideSelectedContacts.join(","));
                   settingProvider.setPref(FirestoreConstants.overrideContacts, ovverideSelectedContacts.join(","));
-
                   setState(() {});
                 }
               },
@@ -238,6 +241,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 var value = await Navigator.push<String>(context, MaterialPageRoute(builder: (context) => UpdateAboutPage(autoReplyMessage: loggedInUser.aboutMe)));
                 if (value != null) {
                   loggedInUser.aboutMe = value;
+                  authProvider.updateReplyMessage(value);
                   settingProvider.setPref(FirestoreConstants.aboutMe, value);
                   setState(() {});
                 }

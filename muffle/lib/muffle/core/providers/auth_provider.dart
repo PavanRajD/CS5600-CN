@@ -71,7 +71,9 @@ class AuthProvider extends ChangeNotifier {
             FirestoreConstants.id: firebaseUser.uid,
             FirestoreConstants.createdAt: DateTime.now().millisecondsSinceEpoch.toString(),
             FirestoreConstants.chattingWith: null,
+            FirestoreConstants.aboutMe: "Available",
             FirestoreConstants.isDNDActivated: "false",
+            FirestoreConstants.overrideContacts: "",
           });
 
           // Write data to local storage
@@ -81,6 +83,7 @@ class AuthProvider extends ChangeNotifier {
           await prefs.setString(FirestoreConstants.photoUrl, currentUser.photoURL ?? "");
           await prefs.setString(FirestoreConstants.aboutMe, "Available");
           await prefs.setString(FirestoreConstants.isDNDActivated, "false");
+          await prefs.setString(FirestoreConstants.overrideContacts, "");
         } else {
           // Already sign up, just get data from firestore
           DocumentSnapshot documentSnapshot = documents[0];
@@ -91,6 +94,7 @@ class AuthProvider extends ChangeNotifier {
           await prefs.setString(FirestoreConstants.photoUrl, userChat.photoUrl);
           await prefs.setString(FirestoreConstants.aboutMe, userChat.aboutMe);
           await prefs.setString(FirestoreConstants.isDNDActivated, userChat.isDNDActivated);
+          await prefs.setString(FirestoreConstants.overrideContacts, userChat.ovverideContacts);
         }
         _status = Status.authenticated;
         notifyListeners();
@@ -107,6 +111,27 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> updateDNDStatus(bool isDNDActivated) async {
+    var firebaseUserId = getUserFirebaseId();
+    firebaseFirestore.collection(FirestoreConstants.pathUserCollection).doc(firebaseUserId).update({
+      FirestoreConstants.isDNDActivated: isDNDActivated.toString(),
+    });
+  }
+
+  Future<void> updateReplyMessage(String autoReplyMessage) async {
+    var firebaseUserId = getUserFirebaseId();
+    firebaseFirestore.collection(FirestoreConstants.pathUserCollection).doc(firebaseUserId).update({
+      FirestoreConstants.aboutMe: autoReplyMessage,
+    });
+  }
+
+  Future<void> updateOvverideListMessage(String overrideContacts) async {
+    var firebaseUserId = getUserFirebaseId();
+    firebaseFirestore.collection(FirestoreConstants.pathUserCollection).doc(firebaseUserId).update({
+      FirestoreConstants.overrideContacts: overrideContacts,
+    });
+  }
+
   void handleException() {
     _status = Status.authenticateException;
     notifyListeners();
@@ -114,6 +139,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> handleSignOut() async {
     _status = Status.uninitialized;
+    await prefs.clear();
     await firebaseAuth.signOut();
     await googleSignIn.disconnect();
     await googleSignIn.signOut();

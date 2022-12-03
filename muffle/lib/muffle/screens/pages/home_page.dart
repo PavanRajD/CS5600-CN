@@ -35,16 +35,22 @@ class HomePageState extends State<HomePage> {
   final int _limitIncrement = 20;
   String _textSearch = "";
   bool isLoading = false;
+  bool isDNDActivated = false;
 
   late AuthProvider authProvider;
   late String currentUserId;
   late HomeProvider homeProvider;
+  late SettingProvider settingProvider;
 
   @override
   void initState() {
     super.initState();
     authProvider = context.read<AuthProvider>();
     homeProvider = context.read<HomeProvider>();
+    settingProvider = context.read<SettingProvider>();
+
+    var dndActivated = settingProvider.getPref(FirestoreConstants.isDNDActivated) ?? "";
+    isDNDActivated = dndActivated == "true";
 
     if (authProvider.getUserFirebaseId()?.isNotEmpty == true) {
       currentUserId = authProvider.getUserFirebaseId()!;
@@ -221,24 +227,20 @@ class HomePageState extends State<HomePage> {
         ),
         centerTitle: false,
         actions: <Widget>[
-          AnimatedToggle(
-            values: ['E', 'A'],
-            onToggleCallback: (value) {
-              setState(() {});
-            },
-            buttonColor: Color(0xFF0A3157),
-            backgroundColor: Color(0xFFB5C1CC),
-            textColor: Color(0xFFFFFFFF),
-          ),
           InkWell(
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(allUsers: allUsers)));
+            onTap: () async {
+              var isDndActivated = await Navigator.push<bool>(context, MaterialPageRoute(builder: (context) => SettingsPage(allUsers: allUsers)));
+              if (isDndActivated != null) {
+                isDNDActivated = isDndActivated;
+              }
+
+              setState(() {});
             },
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Icon(
                 Icons.person_outlined,
-                color: Colors.black,
+                color: isDNDActivated ? Colors.red : Colors.green,
                 size: 30,
               ),
             ),

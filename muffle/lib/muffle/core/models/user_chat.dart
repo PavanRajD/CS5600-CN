@@ -9,8 +9,9 @@ class UserChat {
   String aboutMe;
   String isDNDActivated;
   bool select = false;
+  String ovverideContacts;
 
-  UserChat({required this.id, required this.photoUrl, required this.nickname, required this.aboutMe, required this.isDNDActivated});
+  UserChat({required this.id, required this.photoUrl, required this.nickname, required this.aboutMe, required this.isDNDActivated, this.ovverideContacts = ""});
 
   Map<String, String> toJson() {
     return {
@@ -18,6 +19,7 @@ class UserChat {
       FirestoreConstants.aboutMe: aboutMe,
       FirestoreConstants.photoUrl: photoUrl,
       FirestoreConstants.isDNDActivated: isDNDActivated,
+      FirestoreConstants.overrideContacts: ovverideContacts,
     };
   }
 
@@ -26,6 +28,7 @@ class UserChat {
     String photoUrl = "";
     String nickname = "";
     String isDNDActivated = "false";
+    String ovverideContacts = "";
     try {
       aboutMe = doc.get(FirestoreConstants.aboutMe);
     } catch (e) {}
@@ -38,12 +41,16 @@ class UserChat {
     try {
       isDNDActivated = doc.get(FirestoreConstants.isDNDActivated);
     } catch (e) {}
+    try {
+      ovverideContacts = doc.get(FirestoreConstants.overrideContacts);
+    } catch (e) {}
     return UserChat(
       id: doc.id,
       photoUrl: photoUrl,
       nickname: nickname,
       aboutMe: aboutMe,
       isDNDActivated: isDNDActivated,
+      ovverideContacts: ovverideContacts,
     );
   }
 }
