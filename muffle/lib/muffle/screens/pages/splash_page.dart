@@ -45,7 +45,7 @@ class SplashPageState extends State<SplashPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset(
-              "images/app_icon.png",
+              "images/icon.png",
               width: 100,
               height: 100,
             ),
