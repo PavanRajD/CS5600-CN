@@ -585,17 +585,6 @@ class ChatPageState extends State<ChatPage> {
               ),
             ),
           ),
-          Material(
-            color: Colors.white,
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 1),
-              child: IconButton(
-                icon: const Icon(Icons.face),
-                onPressed: getSticker,
-                color: ColorConstants.primaryColor,
-              ),
-            ),
-          ),
 
           // Edit text
           Flexible(

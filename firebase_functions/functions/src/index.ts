@@ -23,9 +23,8 @@ exports.sendNotification = functions.firestore
             .then((querySnapshot: any[]) => {
                 querySnapshot.forEach(userTo => {
                     console.log(`Found user to: ${userTo.data().nickname}`)
-                    var canSendPush = !userTo.data().isDNDActivated || (userTo.data().overrideContacts && userTo.data().overrideContacts.contains(userTo.data().id))
 
-                    if (canSendPush && (userTo.data().pushToken && userTo.data().chattingWith !== idFrom)) {
+                    if (userTo.data().pushToken && userTo.data().chattingWith !== idFrom) {
                         // Get info user from (sent)
                         admin
                             .firestore()
@@ -35,28 +34,57 @@ exports.sendNotification = functions.firestore
                             .then((querySnapshot2: any[]) => {
                                 querySnapshot2.forEach(userFrom => {
                                     console.log(`Found user from: ${userFrom.data().nickname}`)
-                                    const payload = {
-                                        notification: {
-                                            title: `You have a message from "${userFrom.data().nickname}"`,
-                                            body: contentMessage,
-                                            badge: '1',
-                                            sound: 'default'
+
+                                    var canSendPush = (userTo.data().isDNDActivated == 'false') || (userTo.data().overrideContacts && userTo.data().overrideContacts.includes(idFrom))
+
+                                    if (canSendPush) {
+                                        const payload = {
+                                            notification: {
+                                                title: `"${userFrom.data().nickname}"`,
+                                                body: contentMessage,
+                                                badge: '1',
+                                                sound: 'default'
+                                            }
                                         }
+
+                                        // Let push to the target device
+                                        admin
+                                            .messaging()
+                                            .sendToDevice(userTo.data().pushToken, payload)
+                                            .then((response: any) => {
+                                                console.log('Successfully sent message:', response)
+                                            })
+                                            .catch((error: any) => {
+                                                console.log('Error sending message:', error)
+                                            })
+                                    } else {
+                                        var groupChatId = ''
+                                        if (idFrom.localeCompare(idTo) > 0) {
+                                            groupChatId = `${idFrom}-${idTo}`;
+                                        } else {
+                                            groupChatId = `${idTo}-${idFrom}`;
+                                        }
+
+                                        console.log(`groupChatId : ${groupChatId}`)
+
+                                        admin
+                                            .firestore()
+                                            .collection('messages')
+                                            .doc(groupChatId)
+                                            .collection(groupChatId)
+                                            .doc(Date.now().toString())
+                                            .set({
+                                                idFrom: idTo,
+                                                idTo: idFrom,
+                                                timestamp: Date.now().toString(),
+                                                content: `${userTo.data().nickname} is unavailable. Status: ${userTo.data().aboutMe}`,
+                                                type: 0,
+                                            });
                                     }
-                                    // Let push to the target device
-                                    admin
-                                        .messaging()
-                                        .sendToDevice(userTo.data().pushToken, payload)
-                                        .then((response: any) => {
-                                            console.log('Successfully sent message:', response)
-                                        })
-                                        .catch((error: any) => {
-                                            console.log('Error sending message:', error)
-                                        })
                                 })
                             })
                     } else {
-                        console.log('Can not find pushToken target user')
+                        console.log('Unable to send to target user')
                     }
                 })
             })
