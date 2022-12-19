@@ -7,11 +7,13 @@ class UserChat {
   String photoUrl;
   String nickname;
   String aboutMe;
+  String notAvilableStartTime;
+  String notAvilableEndTime;
   String isDNDActivated;
   bool select = false;
   String ovverideContacts;
 
-  UserChat({required this.id, required this.photoUrl, required this.nickname, required this.aboutMe, required this.isDNDActivated, this.ovverideContacts = ""});
+  UserChat({required this.id, required this.photoUrl, required this.nickname, required this.aboutMe, required this.isDNDActivated, this.notAvilableStartTime = "", this.notAvilableEndTime = "", this.ovverideContacts = ""});
 
   Map<String, String> toJson() {
     return {
@@ -20,6 +22,8 @@ class UserChat {
       FirestoreConstants.photoUrl: photoUrl,
       FirestoreConstants.isDNDActivated: isDNDActivated,
       FirestoreConstants.overrideContacts: ovverideContacts,
+      FirestoreConstants.notAvilableEndTime: notAvilableEndTime,
+      FirestoreConstants.notAvilableStartTime: notAvilableStartTime,
     };
   }
 
@@ -29,6 +33,8 @@ class UserChat {
     String nickname = "";
     String isDNDActivated = "false";
     String ovverideContacts = "";
+    String notAvilableEndTime = "";
+    String notAvilableStartTime = "";
     try {
       aboutMe = doc.get(FirestoreConstants.aboutMe);
     } catch (e) {}
@@ -44,6 +50,12 @@ class UserChat {
     try {
       ovverideContacts = doc.get(FirestoreConstants.overrideContacts);
     } catch (e) {}
+    try {
+      notAvilableEndTime = doc.get(FirestoreConstants.notAvilableEndTime);
+    } catch (e) {}
+    try {
+      notAvilableStartTime = doc.get(FirestoreConstants.notAvilableStartTime);
+    } catch (e) {}
     return UserChat(
       id: doc.id,
       photoUrl: photoUrl,
@@ -51,6 +63,8 @@ class UserChat {
       aboutMe: aboutMe,
       isDNDActivated: isDNDActivated,
       ovverideContacts: ovverideContacts,
+      notAvilableStartTime: notAvilableStartTime,
+      notAvilableEndTime: notAvilableEndTime,
     );
   }
 }

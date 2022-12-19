@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:muffle/muffle/core/core.dart';
 import 'package:muffle/muffle/screens/pages/select_contact_page.dart';
 import 'package:muffle/muffle/screens/pages/update_about_page.dart';
+import 'package:muffle/muffle/screens/pages/new_time_picker.dart' as TP;
 import 'package:muffle/muffle/screens/shared/models/typography.dart';
 import 'package:provider/provider.dart';
 
@@ -42,6 +43,8 @@ class _SettingsPageState extends State<SettingsPage> {
       nickname: settingProvider.getPref(FirestoreConstants.nickname) ?? "",
       aboutMe: settingProvider.getPref(FirestoreConstants.aboutMe) ?? "",
       isDNDActivated: settingProvider.getPref(FirestoreConstants.isDNDActivated) ?? "",
+      notAvilableStartTime: settingProvider.getPref(FirestoreConstants.notAvilableStartTime) ?? "",
+      notAvilableEndTime: settingProvider.getPref(FirestoreConstants.notAvilableEndTime) ?? "",
     );
 
     var overrideContacts = settingProvider.getPref(FirestoreConstants.overrideContacts)?.split(",");
@@ -225,6 +228,54 @@ class _SettingsPageState extends State<SettingsPage> {
                           text: "${ovverideSelectedContacts.length} contacts selected",
                           appTextStyle: TextTypography.textLabel,
                           color: ColorConstants.greyColor,
+                        ),
+                      ],
+                    ),
+                    Icon(Icons.arrow_forward_ios_rounded),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            InkWell(
+              onTap: () async {
+                var time = TimeOfDay.now();
+                var startTime = await TP.showTimePicker(context: context, initialTime: time);
+                var endTime = await TP.showTimePicker(context: context, initialTime: time);
+                if (endTime != null && startTime != null) {
+                  loggedInUser.notAvilableStartTime = "${startTime.hour.toString()}:${startTime.minute.toString()}";
+                  loggedInUser.notAvilableEndTime = "${endTime.hour.toString()}:${endTime.minute.toString()}";
+                }
+
+                authProvider.updateNonAvilableTimings(loggedInUser.notAvilableStartTime, loggedInUser.notAvilableEndTime);
+                settingProvider.setPref(FirestoreConstants.notAvilableStartTime, loggedInUser.notAvilableStartTime);
+                settingProvider.setPref(FirestoreConstants.notAvilableEndTime, loggedInUser.notAvilableEndTime);
+
+                setState(() {});
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AppText(
+                          text: "Not available timeslot",
+                          appTextStyle: TextTypography.textBody,
+                        ),
+                        SizedBox(
+                          height: 4,
+                        ),
+                        AppText(
+                          text: loggedInUser.notAvilableStartTime.isNotEmpty ? '${loggedInUser.notAvilableStartTime} - ${loggedInUser.notAvilableEndTime}' : '-- Not Set --',
+                          appTextStyle: TextTypography.textLabel,
+                          color: ColorConstants.greyColor,
+                          textOverflow: TextOverflow.ellipsis,
+                          maxLines: 2,
                         ),
                       ],
                     ),

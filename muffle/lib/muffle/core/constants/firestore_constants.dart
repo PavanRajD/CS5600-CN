@@ -14,4 +14,6 @@ class FirestoreConstants {
   static const type = "type";
   static const createdAt = "createdAt";
   static const overrideContacts = "overrideContacts";
+  static const notAvilableStartTime = "notAvilableStartTime";
+  static const notAvilableEndTime = "notAvilableEndTime";
 }

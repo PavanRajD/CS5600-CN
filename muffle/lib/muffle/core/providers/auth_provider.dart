@@ -74,6 +74,8 @@ class AuthProvider extends ChangeNotifier {
             FirestoreConstants.aboutMe: "Available",
             FirestoreConstants.isDNDActivated: "false",
             FirestoreConstants.overrideContacts: "",
+            FirestoreConstants.notAvilableEndTime: "",
+            FirestoreConstants.notAvilableStartTime: "",
           });
 
           // Write data to local storage
@@ -84,6 +86,8 @@ class AuthProvider extends ChangeNotifier {
           await prefs.setString(FirestoreConstants.aboutMe, "Available");
           await prefs.setString(FirestoreConstants.isDNDActivated, "false");
           await prefs.setString(FirestoreConstants.overrideContacts, "");
+          await prefs.setString(FirestoreConstants.notAvilableEndTime, "");
+          await prefs.setString(FirestoreConstants.notAvilableStartTime, "");
         } else {
           // Already sign up, just get data from firestore
           DocumentSnapshot documentSnapshot = documents[0];
@@ -95,6 +99,8 @@ class AuthProvider extends ChangeNotifier {
           await prefs.setString(FirestoreConstants.aboutMe, userChat.aboutMe);
           await prefs.setString(FirestoreConstants.isDNDActivated, userChat.isDNDActivated);
           await prefs.setString(FirestoreConstants.overrideContacts, userChat.ovverideContacts);
+          await prefs.setString(FirestoreConstants.notAvilableEndTime, userChat.notAvilableEndTime);
+          await prefs.setString(FirestoreConstants.notAvilableStartTime, userChat.notAvilableStartTime);
         }
         _status = Status.authenticated;
         notifyListeners();
@@ -122,6 +128,14 @@ class AuthProvider extends ChangeNotifier {
     var firebaseUserId = getUserFirebaseId();
     firebaseFirestore.collection(FirestoreConstants.pathUserCollection).doc(firebaseUserId).update({
       FirestoreConstants.aboutMe: autoReplyMessage,
+    });
+  }
+
+  Future<void> updateNonAvilableTimings(String startTime, String endTime) async {
+    var firebaseUserId = getUserFirebaseId();
+    firebaseFirestore.collection(FirestoreConstants.pathUserCollection).doc(firebaseUserId).update({
+      FirestoreConstants.notAvilableStartTime: startTime,
+      FirestoreConstants.notAvilableEndTime: endTime,
     });
   }
 

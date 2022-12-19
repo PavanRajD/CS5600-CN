@@ -2,6 +2,16 @@ const functions = require('firebase-functions')
 const admin = require('firebase-admin')
 admin.initializeApp()
 
+function setDateTime(date: any, time: any) {
+    var index = time.indexOf(":");
+    var hours = time.substring(0, index);
+    var minutes = time.substring(index + 1, time.length);
+    date.setHours(hours);
+    date.setMinutes(minutes);
+    date.setSeconds("00");
+    return date;
+}
+
 exports.sendNotification = functions.firestore
     .document('messages/{groupId1}/{groupId2}/{message}')
     .onCreate((snap: { data: () => any }, context: any) => {
@@ -34,8 +44,14 @@ exports.sendNotification = functions.firestore
                             .then((querySnapshot2: any[]) => {
                                 querySnapshot2.forEach(userFrom => {
                                     console.log(`Found user from: ${userFrom.data().nickname}`)
+                                    var currentDate = new Date()
+                                    var startDate = setDateTime(new Date(), userTo.data().notAvilableStartTime)
+                                    var endDate = setDateTime(new Date(), userTo.data().notAvilableEndTime)
+                                    var isValidTime = (startDate < currentDate && endDate > currentDate) ?? true
+                                    console.log(setDateTime(new Date(), userTo.data().notAvilableStartTime))
+                                    console.log(setDateTime(new Date(), userTo.data().notAvilableEndTime))
 
-                                    var canSendPush = (userTo.data().isDNDActivated == 'false') || (userTo.data().overrideContacts && userTo.data().overrideContacts.includes(idFrom))
+                                    var canSendPush = isValidTime && (userTo.data().isDNDActivated == 'false') || (userTo.data().overrideContacts && userTo.data().overrideContacts.includes(idFrom))
 
                                     if (canSendPush) {
                                         const payload = {
